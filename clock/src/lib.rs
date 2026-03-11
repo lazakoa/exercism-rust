@@ -1,4 +1,4 @@
-use std::{fmt, ops::Rem};
+use std::fmt;
 
 #[derive(Debug)]
 pub struct Clock {
@@ -12,8 +12,10 @@ impl Clock {
         let hours_total = (hours + minutes / 60).rem_euclid(24);
 
         let mut modifier = 0;
-        if minutes < 0 && (minutes / 60 != 0) && minutes_total > 0 {
-            modifier = -1;
+        if minutes < 0 {
+            if minutes_total != 0 {
+                modifier = -1;
+            }
         }
         
         return Clock {
@@ -25,16 +27,17 @@ impl Clock {
     pub fn add_minutes(&self, minutes: i32) -> Self {
         let minutes_added = self.minutes + minutes;
         let minutes_total = self.hours * 60 + minutes_added;
-        let mut hours_total = minutes_total / 60;
-
-        if minutes_added < 0 {
-            if minutes_total - self.hours * 60 != 0 {
-                hours_total = -1 + hours_total;
-            }
+        let hours_total = minutes_total / 60;
+        
+        let mut modifier = 0;
+        if minutes_total < 0 {
+           modifier = -1; 
         }
+
+        println!("{}", hours_total);
  
         return Clock {
-            hours: (hours_total).rem_euclid(24),
+            hours: (modifier + hours_total).rem_euclid(24),
             minutes: (minutes_total - hours_total * 60).rem_euclid(60),
         };
     }
