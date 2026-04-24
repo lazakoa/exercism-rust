@@ -1,43 +1,32 @@
 /// Check a Luhn checksum.
 pub fn is_valid(code: &str) -> bool {
-    let mut values = Vec::new();
-
-    for c in code.chars() {
-        match c {
-            '0' => values.push(0),
-            '1' => values.push(1),
-            '2' => values.push(2),
-            '3' => values.push(3),
-            '4' => values.push(4),
-            '5' => values.push(5),
-            '6' => values.push(6),
-            '7' => values.push(7),
-            '8' => values.push(8),
-            '9' => values.push(9),
-            ' ' => (),
-            _ => return false,
-        }
+    if !code.chars().all(|x| x.is_numeric() || x == ' ') {
+        return false;
     }
+
+    let values: Vec<_> = code.chars().filter_map(|x| x.to_digit(10)).collect();
 
     if values.len() < 2 {
         return false;
     }
 
-    values.reverse();
-
     let mut doubling_flag = false;
 
-    for value in values.iter_mut() {
-        if doubling_flag {
-            *value *= 2;
-            if *value > 9 {
-                *value -= 9
+    let sum: u32 = values
+        .iter()
+        .rev()
+        .map(|x| {
+            let mut temp = *x;
+            if doubling_flag {
+                temp *= 2;
+                if temp > 9 {
+                    temp -= 9
+                }
             }
-        }
-        doubling_flag = !doubling_flag;
-    }
+            doubling_flag = !doubling_flag;
+            temp
+        })
+        .sum();
 
-    let sum: i32 = values.into_iter().sum();
-
-    sum % 10 == 0
+    sum.is_multiple_of(10)
 }
